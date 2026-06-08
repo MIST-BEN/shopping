@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Serein Select - 生活方式精选店</title>
+    <meta name="description" content="Serein Select 是一个响应式单页电商 Demo，包含商品筛选、搜索排序、购物车、收藏、库存和结算交互。">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -282,7 +283,8 @@
             transition: var(--transition);
         }
 
-        .filter-btn:hover {
+        .filter-btn:hover,
+        .filter-btn.active {
             border-color: var(--line);
             color: var(--ink);
             background: var(--paper-soft);
@@ -519,6 +521,25 @@
             font-weight: 800;
         }
 
+        .product-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: -4px 0 14px;
+            color: var(--muted);
+            font-size: 0.78rem;
+        }
+
+        .product-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: #fbf7ef;
+        }
+
         .product-actions {
             display: flex;
             gap: 10px;
@@ -752,6 +773,40 @@
             font-weight: 800;
         }
 
+        .cart-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .ghost-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            margin-top: 14px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: var(--paper);
+            color: var(--muted);
+            font-weight: 800;
+            transition: var(--transition);
+        }
+
+        .ghost-btn:hover {
+            border-color: var(--olive);
+            color: var(--olive);
+            background: #f0eadf;
+        }
+
+        .checkout-btn:disabled,
+        .ghost-btn:disabled,
+        .add-to-cart:disabled {
+            cursor: not-allowed;
+            opacity: 0.56;
+        }
+
         .share-card {
             padding: 18px;
         }
@@ -819,6 +874,64 @@
         .notification.show {
             transform: translateY(0);
             opacity: 1;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(31, 36, 32, 0.42);
+            z-index: 20;
+        }
+
+        .modal-backdrop.show {
+            display: flex;
+        }
+
+        .checkout-modal {
+            width: min(460px, 100%);
+            padding: 22px;
+            border: 1px solid rgba(66, 80, 61, 0.18);
+            border-radius: 10px;
+            background: var(--paper);
+            box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
+        }
+
+        .checkout-modal h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--ink);
+            font-size: 1.1rem;
+        }
+
+        .checkout-summary {
+            display: grid;
+            gap: 8px;
+            margin: 18px 0;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: #fbf7ef;
+        }
+
+        .checkout-summary div {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-actions button {
+            flex: 1;
         }
 
         .empty-state {
@@ -895,6 +1008,14 @@
 
             .section-heading,
             .stats-header {
+                flex-direction: column;
+            }
+
+            .cart-actions {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-actions {
                 flex-direction: column;
             }
 
@@ -1064,7 +1185,10 @@
                         <span>合计</span>
                         <span id="cart-total">¥0</span>
                     </div>
-                    <button class="checkout-btn"><i class="fas fa-credit-card"></i> 完成结算</button>
+                    <div class="cart-actions">
+                        <button class="ghost-btn" id="clear-cart" type="button"><i class="fas fa-trash-can"></i> 清空</button>
+                        <button class="checkout-btn" id="checkout-btn" type="button"><i class="fas fa-credit-card"></i> 结算</button>
+                    </div>
                 </section>
 
                 <section class="share-card panel">
@@ -1080,6 +1204,22 @@
     <div class="notification" id="notification">
         <i class="fas fa-circle-check"></i>
         <span>已加入购物袋</span>
+    </div>
+
+    <div class="modal-backdrop" id="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title">
+        <div class="checkout-modal">
+            <h2 id="checkout-title"><i class="fas fa-receipt"></i> 确认订单</h2>
+            <p class="microcopy">这是前端 Demo 的模拟结算，确认后会更新今日订单和销售额。</p>
+            <div class="checkout-summary">
+                <div><span>商品数量</span><strong id="checkout-items">0 件</strong></div>
+                <div><span>订单金额</span><strong id="checkout-total">¥0</strong></div>
+                <div><span>预计发货</span><strong>48 小时内</strong></div>
+            </div>
+            <div class="modal-actions">
+                <button class="ghost-btn" id="cancel-checkout" type="button">再看看</button>
+                <button class="checkout-btn" id="confirm-checkout" type="button">确认结算</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1126,7 +1266,37 @@
             { id: 20, name: "木质香水套盒", price: 599, category: "beauty", description: "三支小容量香气，从清晨皂感到夜晚木质调都有。", badge: "新到", image: "https://images.unsplash.com/photo-1590736704728-f4730bb30770?auto=format&fit=crop&w=900&q=80" }
         ];
 
+        const productDetails = {
+            1: { stock: 6, rating: 4.9 },
+            2: { stock: 8, rating: 4.8 },
+            3: { stock: 14, rating: 4.7 },
+            4: { stock: 5, rating: 4.6 },
+            5: { stock: 3, rating: 4.9 },
+            6: { stock: 4, rating: 4.7 },
+            7: { stock: 16, rating: 4.5 },
+            8: { stock: 7, rating: 4.8 },
+            9: { stock: 10, rating: 4.6 },
+            10: { stock: 6, rating: 4.7 },
+            11: { stock: 9, rating: 4.8 },
+            12: { stock: 12, rating: 4.5 },
+            13: { stock: 8, rating: 4.6 },
+            14: { stock: 18, rating: 4.7 },
+            15: { stock: 10, rating: 4.6 },
+            16: { stock: 20, rating: 4.5 },
+            17: { stock: 13, rating: 4.7 },
+            18: { stock: 11, rating: 4.8 },
+            19: { stock: 9, rating: 4.6 },
+            20: { stock: 5, rating: 4.9 }
+        };
+
+        products.forEach(product => Object.assign(product, productDetails[product.id]));
+
+        const CART_STORAGE_KEY = "serein-select-cart-v1";
+        const FAVORITES_STORAGE_KEY = "serein-select-favorites-v1";
+        const METRICS_STORAGE_KEY = "serein-select-metrics-v1";
+
         let cart = [];
+        let favorites = new Set();
         let ordersToday = 0;
         let salesToday = 0;
         let targetSales = 30000;
@@ -1150,9 +1320,56 @@
         const statOrdersElement = document.getElementById("stat-orders");
         const statSalesElement = document.getElementById("stat-sales");
         const statRateElement = document.getElementById("stat-rate");
+        const clearCartBtn = document.getElementById("clear-cart");
+        const checkoutBtn = document.getElementById("checkout-btn");
+        const checkoutModal = document.getElementById("checkout-modal");
+        const checkoutItemsElement = document.getElementById("checkout-items");
+        const checkoutTotalElement = document.getElementById("checkout-total");
+        const cancelCheckoutBtn = document.getElementById("cancel-checkout");
+        const confirmCheckoutBtn = document.getElementById("confirm-checkout");
 
         function formatPrice(value) {
             return `¥${value.toLocaleString("zh-CN")}`;
+        }
+
+        function safeRead(key, fallback) {
+            try {
+                return JSON.parse(localStorage.getItem(key)) ?? fallback;
+            } catch {
+                return fallback;
+            }
+        }
+
+        function saveCart() {
+            localStorage.setItem(
+                CART_STORAGE_KEY,
+                JSON.stringify(cart.map(item => ({ id: item.id, quantity: item.quantity })))
+            );
+        }
+
+        function saveFavorites() {
+            localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify([...favorites]));
+        }
+
+        function saveMetrics() {
+            localStorage.setItem(METRICS_STORAGE_KEY, JSON.stringify({ ordersToday, salesToday }));
+        }
+
+        function loadSavedState() {
+            const savedCart = safeRead(CART_STORAGE_KEY, []);
+            cart = savedCart
+                .map(item => {
+                    const product = products.find(productItem => productItem.id === Number(item.id));
+                    if (!product) return null;
+                    return { ...product, quantity: Math.min(Number(item.quantity) || 1, product.stock) };
+                })
+                .filter(Boolean);
+
+            favorites = new Set(safeRead(FAVORITES_STORAGE_KEY, []));
+
+            const savedMetrics = safeRead(METRICS_STORAGE_KEY, {});
+            ordersToday = Number(savedMetrics.ordersToday) || 0;
+            salesToday = Number(savedMetrics.salesToday) || 0;
         }
 
         function getFilteredProducts() {
@@ -1170,9 +1387,18 @@
 
             if (currentSort === "price") {
                 list.sort((a, b) => a.price - b.price);
+            } else if (currentSort === "rating") {
+                list.sort((a, b) => b.rating - a.rating);
             }
 
             return list;
+        }
+
+        function updateSortButtons() {
+            document.querySelectorAll("[data-sort]").forEach(button => {
+                const isActive = button.dataset.sort === currentSort || (button.dataset.sort === "featured" && currentSort === "featured");
+                button.classList.toggle("active", isActive);
+            });
         }
 
         function renderProducts() {
@@ -1196,6 +1422,8 @@
             }
 
             filteredProducts.forEach(product => {
+                const favoriteActive = favorites.has(product.id);
+                const stockLabel = product.stock <= 5 ? `仅剩 ${product.stock} 件` : `库存 ${product.stock} 件`;
                 const card = document.createElement("article");
                 card.className = "product-card";
                 card.dataset.id = product.id;
@@ -1209,14 +1437,19 @@
                         <h3>${product.name}</h3>
                         <p>${product.description}</p>
                         <div class="product-price">${formatPrice(product.price)}</div>
+                        <div class="product-meta">
+                            <span><i class="fas fa-star"></i> ${product.rating}</span>
+                            <span><i class="fas fa-box"></i> ${stockLabel}</span>
+                        </div>
                         <div class="product-actions">
-                            <button class="add-to-cart" type="button"><i class="fas fa-bag-shopping"></i> 加入购物袋</button>
-                            <button class="favorite-btn" type="button" aria-label="收藏 ${product.name}"><i class="far fa-heart"></i></button>
+                            <button class="add-to-cart" type="button" ${product.stock <= 0 ? "disabled" : ""}><i class="fas fa-bag-shopping"></i> 加入购物袋</button>
+                            <button class="favorite-btn ${favoriteActive ? "active" : ""}" type="button" aria-label="收藏 ${product.name}" aria-pressed="${favoriteActive}"><i class="${favoriteActive ? "fas" : "far"} fa-heart"></i></button>
                         </div>
                     </div>
                 `;
                 productsGrid.appendChild(card);
             });
+            updateSortButtons();
         }
 
         function setCategory(category) {
@@ -1233,6 +1466,10 @@
 
             const existingItem = cart.find(item => item.id === product.id);
             if (existingItem) {
+                if (existingItem.quantity >= product.stock) {
+                    showNotification(`${product.name} 库存不足`);
+                    return;
+                }
                 existingItem.quantity += 1;
             } else {
                 cart.push({ ...product, quantity: 1 });
@@ -1248,6 +1485,9 @@
 
             cartCountElement.textContent = `${totalItems} 件`;
             cartTotalElement.textContent = formatPrice(totalPrice);
+            clearCartBtn.disabled = cart.length === 0;
+            checkoutBtn.disabled = cart.length === 0;
+            saveCart();
 
             if (cart.length === 0) {
                 cartItemsContainer.innerHTML = `
@@ -1284,6 +1524,7 @@
             statOrdersElement.textContent = ordersToday;
             statSalesElement.textContent = formatPrice(salesToday);
             statRateElement.textContent = `${completionRate}%`;
+            saveMetrics();
         }
 
         function showNotification(message) {
@@ -1293,19 +1534,71 @@
             showNotification.timer = window.setTimeout(() => notification.classList.remove("show"), 1800);
         }
 
-        function checkout() {
+        function getCartSummary() {
+            return {
+                totalItems: cart.reduce((sum, item) => sum + item.quantity, 0),
+                totalPrice: cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+            };
+        }
+
+        function openCheckoutModal() {
             if (cart.length === 0) {
                 showNotification("先挑几件喜欢的好物吧");
                 return;
             }
 
-            const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+            const { totalItems, totalPrice } = getCartSummary();
+            checkoutItemsElement.textContent = `${totalItems} 件`;
+            checkoutTotalElement.textContent = formatPrice(totalPrice);
+            checkoutModal.classList.add("show");
+        }
+
+        function closeCheckoutModal() {
+            checkoutModal.classList.remove("show");
+        }
+
+        function checkout() {
+            const { totalPrice } = getCartSummary();
             salesToday += totalPrice;
             ordersToday += 1;
             cart = [];
+            closeCheckoutModal();
             updateCartDisplay();
             updateStats();
             showNotification("订单已完成，感谢光临");
+        }
+
+        function clearCart() {
+            if (cart.length === 0) return;
+            cart = [];
+            updateCartDisplay();
+            showNotification("购物袋已清空");
+        }
+
+        function toggleFavorite(productId, button) {
+            const id = Number(productId);
+            if (favorites.has(id)) {
+                favorites.delete(id);
+            } else {
+                favorites.add(id);
+            }
+            saveFavorites();
+            const active = favorites.has(id);
+            button.classList.toggle("active", active);
+            button.setAttribute("aria-pressed", String(active));
+            button.innerHTML = active ? '<i class="fas fa-heart"></i>' : '<i class="far fa-heart"></i>';
+        }
+
+        function setSort(sort) {
+            currentSort = sort === "reset" ? "featured" : sort;
+            if (sort === "reset") {
+                currentQuery = "";
+                searchInput.value = "";
+                setCategory("all");
+            } else {
+                renderProducts();
+            }
+            updateSortButtons();
         }
 
         document.addEventListener("click", event => {
@@ -1323,10 +1616,7 @@
 
             const favoriteButton = event.target.closest(".favorite-btn");
             if (favoriteButton) {
-                favoriteButton.classList.toggle("active");
-                favoriteButton.innerHTML = favoriteButton.classList.contains("active")
-                    ? '<i class="fas fa-heart"></i>'
-                    : '<i class="far fa-heart"></i>';
+                toggleFavorite(favoriteButton.closest(".product-card").dataset.id, favoriteButton);
                 return;
             }
 
@@ -1337,6 +1627,11 @@
                 if (!item) return;
 
                 if (event.target.closest(".increase")) {
+                    const product = products.find(productItem => productItem.id === productId);
+                    if (product && item.quantity >= product.stock) {
+                        showNotification(`${product.name} 库存不足`);
+                        return;
+                    }
                     item.quantity += 1;
                 } else if (event.target.closest(".decrease")) {
                     item.quantity -= 1;
@@ -1352,18 +1647,17 @@
 
             const sortButton = event.target.closest("[data-sort]");
             if (sortButton) {
-                currentSort = sortButton.dataset.sort === "reset" ? "featured" : sortButton.dataset.sort;
-                if (sortButton.dataset.sort === "reset") {
-                    currentQuery = "";
-                    searchInput.value = "";
-                    setCategory("all");
-                } else {
-                    renderProducts();
-                }
+                setSort(sortButton.dataset.sort);
             }
         });
 
-        document.querySelector(".checkout-btn").addEventListener("click", checkout);
+        checkoutBtn.addEventListener("click", openCheckoutModal);
+        clearCartBtn.addEventListener("click", clearCart);
+        cancelCheckoutBtn.addEventListener("click", closeCheckoutModal);
+        confirmCheckoutBtn.addEventListener("click", checkout);
+        checkoutModal.addEventListener("click", event => {
+            if (event.target === checkoutModal) closeCheckoutModal();
+        });
         document.getElementById("search-btn").addEventListener("click", () => {
             currentQuery = searchInput.value;
             renderProducts();
@@ -1383,6 +1677,7 @@
         });
 
         function init() {
+            loadSavedState();
             shareLink.textContent = window.location.href;
             renderProducts();
             updateCartDisplay();
